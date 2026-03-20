@@ -10,10 +10,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+
 import { useLocalStorage } from "@/hooks/use-local-storage";
-import { calculatorSchema, type CalculatorFormValues } from "@/schemas/calculator.schema";
+import {
+  calculatorSchema,
+  type CalculatorFormValues,
+} from "@/schemas/calculator.schema";
 import { parseTimeInput } from "@/lib/time";
 import {
   calcFilamentCost,
@@ -22,13 +24,28 @@ import {
   calcSuggestedPrice,
 } from "@/lib/cost";
 
-const fmt = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+const fmt = new Intl.NumberFormat("pt-BR", {
+  style: "currency",
+  currency: "BRL",
+});
 
 export function CalculatorForm() {
-  const [storedPricePerKg, setStoredPricePerKg] = useLocalStorage<number>("lc_price_per_kg", 100);
-  const [storedMarkup, setStoredMarkup] = useLocalStorage<number>("lc_markup_percent", 30);
-  const [storedWattage, setStoredWattage] = useLocalStorage<number>("lc_printer_wattage", 250);
-  const [storedEnergy, setStoredEnergy] = useLocalStorage<number>("lc_energy_cost_per_kwh", 0.75);
+  const [storedPricePerKg, setStoredPricePerKg] = useLocalStorage<number>(
+    "lc_price_per_kg",
+    100,
+  );
+  const [storedMarkup, setStoredMarkup] = useLocalStorage<number>(
+    "lc_markup_percent",
+    30,
+  );
+  const [storedWattage, setStoredWattage] = useLocalStorage<number>(
+    "lc_printer_wattage",
+    250,
+  );
+  const [storedEnergy, setStoredEnergy] = useLocalStorage<number>(
+    "lc_energy_cost_per_kwh",
+    0.75,
+  );
 
   const form = useForm<CalculatorFormValues>({
     resolver: zodResolver(calculatorSchema),
@@ -50,10 +67,18 @@ export function CalculatorForm() {
   const watchedWattage = form.watch("printer_wattage");
   const watchedEnergy = form.watch("energy_cost_per_kwh");
 
-  useEffect(() => { setStoredPricePerKg(watchedPricePerKg); }, [watchedPricePerKg]);
-  useEffect(() => { setStoredMarkup(watchedMarkup); }, [watchedMarkup]);
-  useEffect(() => { setStoredWattage(watchedWattage); }, [watchedWattage]);
-  useEffect(() => { setStoredEnergy(watchedEnergy); }, [watchedEnergy]);
+  useEffect(() => {
+    setStoredPricePerKg(watchedPricePerKg);
+  }, [watchedPricePerKg]);
+  useEffect(() => {
+    setStoredMarkup(watchedMarkup);
+  }, [watchedMarkup]);
+  useEffect(() => {
+    setStoredWattage(watchedWattage);
+  }, [watchedWattage]);
+  useEffect(() => {
+    setStoredEnergy(watchedEnergy);
+  }, [watchedEnergy]);
 
   // Live preview — useWatch subscribes to all fields reactively
   const values = useWatch({ control: form.control });
@@ -68,7 +93,11 @@ export function CalculatorForm() {
     printerWattage: values.printer_wattage ?? 0,
     energyCostPerKwh: values.energy_cost_per_kwh ?? 0,
   });
-  const totalCost = calcTotalCost({ filamentCost, energyCost, suppliesCost: 0 });
+  const totalCost = calcTotalCost({
+    filamentCost,
+    energyCost,
+    suppliesCost: 0,
+  });
   const suggestedPrice = calcSuggestedPrice({
     totalCost,
     markupPercent: values.markup_percent ?? 0,
@@ -85,14 +114,18 @@ export function CalculatorForm() {
               <FormItem>
                 <FormLabel>Tempo de impressão</FormLabel>
                 <FormControl>
-                  <Input placeholder="ex: 1h30m, 90min, 2h" {...field} />
+                  <Input
+                    placeholder="ex: 1h30m, 90min, 2h"
+                    inputMode="text"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <FormField
               control={form.control}
               name="filament_grams_used"
@@ -104,6 +137,7 @@ export function CalculatorForm() {
                       type="number"
                       min={0}
                       step={0.1}
+                      inputMode="decimal"
                       {...field}
                       onChange={(e) => field.onChange(e.target.valueAsNumber)}
                     />
@@ -124,6 +158,7 @@ export function CalculatorForm() {
                       type="number"
                       min={0}
                       step={0.01}
+                      inputMode="decimal"
                       {...field}
                       onChange={(e) => field.onChange(e.target.valueAsNumber)}
                     />
@@ -134,7 +169,7 @@ export function CalculatorForm() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <FormField
               control={form.control}
               name="printer_wattage"
@@ -146,6 +181,7 @@ export function CalculatorForm() {
                       type="number"
                       min={0}
                       step={1}
+                      inputMode="decimal"
                       {...field}
                       onChange={(e) => field.onChange(e.target.valueAsNumber)}
                     />
@@ -166,6 +202,7 @@ export function CalculatorForm() {
                       type="number"
                       min={0}
                       step={0.01}
+                      inputMode="decimal"
                       {...field}
                       onChange={(e) => field.onChange(e.target.valueAsNumber)}
                     />
@@ -188,6 +225,7 @@ export function CalculatorForm() {
                     min={0}
                     max={1000}
                     step={1}
+                    inputMode="decimal"
                     {...field}
                     onChange={(e) => field.onChange(e.target.valueAsNumber)}
                   />
@@ -199,30 +237,36 @@ export function CalculatorForm() {
         </form>
       </Form>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Resultado</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Filamento</span>
-            <span>{fmt.format(filamentCost)}</span>
+      <div className="sticky bottom-4 z-10 border-4 border-black bg-[#ff90e8] p-6 shadow-[8px_8px_0_0_rgba(0,0,0,1)] sm:static">
+        <div className="mb-4 border-b-4 border-black pb-2">
+          <h2 className="text-xl font-black uppercase tracking-tight text-black">
+            Resultado Final
+          </h2>
+        </div>
+        <div className="space-y-4 text-sm font-bold text-black">
+          <div className="flex justify-between items-center text-base">
+            <span className="uppercase">Filamento</span>
+            <span className="text-lg">{fmt.format(filamentCost)}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Energia</span>
-            <span>{fmt.format(energyCost)}</span>
+          <div className="flex justify-between items-center text-base">
+            <span className="uppercase">Energia</span>
+            <span className="text-lg">{fmt.format(energyCost)}</span>
           </div>
-          <Separator />
-          <div className="flex justify-between font-medium">
-            <span>Custo total</span>
+          <div className="h-1 w-full bg-black"></div>
+          <div className="flex justify-between items-center text-lg">
+            <span className="uppercase">Custo total</span>
             <span>{fmt.format(totalCost)}</span>
           </div>
-          <div className="flex justify-between font-semibold text-base">
-            <span>Preço sugerido</span>
-            <span className="text-indigo-600">{fmt.format(suggestedPrice)}</span>
+          <div className="mt-2 flex items-center justify-between border-4 border-black bg-[#ffc900] p-4 text-xl">
+            <span className="font-black uppercase text-black">
+              Preço sugerido
+            </span>
+            <span className="font-black text-black">
+              {fmt.format(suggestedPrice)}
+            </span>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
